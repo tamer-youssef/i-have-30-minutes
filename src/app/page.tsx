@@ -1,103 +1,138 @@
-import Image from "next/image";
+"use client";
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useEffect } from "react";
+import { Task, tasks, Duration, Location, Goal } from "@/data/tasks";
+import { getRandomOption, findAnotherTask, handleFindTask, randomize } from "@/lib/task-functions";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const minutesOptions: Duration[] = [5, 10, 15, 30];
+  const locationOptions: Location[] = ["work", "home", "the gym", "school"];
+  const goalOptions: Goal[] = ["energize", "relax", "focus", "learn"];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const [minutes, setMinutes] = useState<string>(getRandomOption(minutesOptions).toString());
+  const [location, setLocation] = useState<Location>(getRandomOption(locationOptions));
+  const [goal, setGoal] = useState<Goal>(getRandomOption(goalOptions));
+  const [isMounted, setIsMounted] = useState(false);
+  const [isRandomizing, setIsRandomizing] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTaskCycling, setIsTaskCycling] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col relative">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-2">
+        {selectedTask ? (
+          <div className="w-full max-w-[480px] min-h-[480px] justify-center flex flex-col">
+            <div className="space-y-6 sm:space-y-8">
+
+              <button 
+                onClick={() => setSelectedTask(null)} 
+                className="text-sm bg-muted-foreground/20 text-foreground px-4 py-2 rounded-none hover:bg-foreground/30 transition-colors"
+              >
+                ← Try again
+              </button>
+
+              <p className="text-2xl sm:text-4xl min-h-[200px] flex items-center justify-center">{selectedTask.description}</p>
+
+              <button 
+                onClick={(e) => findAnotherTask(e, tasks, minutes, location, goal, selectedTask, isTaskCycling, setIsTaskCycling, setSelectedTask)}
+                disabled={isTaskCycling}
+                className="bg-foreground w-full text-background px-6 py-3 rounded-none font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
+              >
+                Give me another task ↻
+              </button>
+
+            </div>
+          </div>
+        ) : (
+          <div className="w-full max-w-[480px]">
+            <div className="text-2xl sm:text-4xl text-muted-foreground">
+              I have{""}
+              <Select value={minutes} onValueChange={setMinutes}>
+                <SelectTrigger className="inline-flex text-foreground p-0 mx-2 sm:mx-4 border-0 !border-b-2 !border-blue-500 hover:!bg-blue-500/30 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:!border-blue-500 active:!border-blue-500 text-2xl sm:text-4xl bg-transparent [&>span]:!bg-transparent transition-colors [&>button]:!bg-transparent">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background rounded-none text-2xl sm:text-4xl">
+                  {minutesOptions.map((num) => (
+                    <SelectItem 
+                      key={num} 
+                      value={num.toString()}
+                      className="text-xl sm:text-2xl hover:!bg-blue-500/30 data-[state=checked]:!bg-blue-500/30"
+                    >
+                      {num.toString().padStart(2, '0')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {""}minutes
+            </div>
+
+            <div className="text-2xl sm:text-4xl text-muted-foreground">
+              at{""}
+              <Select value={location} onValueChange={(value: string) => setLocation(value as Location)}>
+                <SelectTrigger className="inline-flex text-foreground p-0 ml-2 sm:ml-4 border-0 !border-b-2 !border-green-500 hover:!bg-green-500/30 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:!border-green-500 active:!border-green-500 text-2xl sm:text-4xl bg-transparent [&>span]:!bg-transparent transition-colors [&>button]:!bg-transparent">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background rounded-none text-2xl sm:text-4xl">
+                  {locationOptions.map((location) => (
+                    <SelectItem 
+                      key={location} 
+                      value={location}
+                      className="text-xl sm:text-2xl hover:!bg-green-500/30 data-[state=checked]:!bg-green-500/30"
+                    >
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="text-2xl sm:text-4xl text-muted-foreground">
+              and want to{""}
+              <Select value={goal} onValueChange={(value: string) => setGoal(value as Goal)}>
+                <SelectTrigger className="inline-flex text-foreground p-0 ml-2 sm:ml-4 border-0 !border-b-2 !border-purple-500 hover:!bg-purple-500/30 focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:!border-purple-500 active:!border-purple-500 text-2xl sm:text-4xl bg-transparent [&>span]:!bg-transparent transition-colors [&>button]:!bg-transparent">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background rounded-none text-2xl sm:text-4xl">
+                  {goalOptions.map((goal) => (
+                    <SelectItem 
+                      key={goal} 
+                      value={goal}
+                      className="text-xl sm:text-2xl hover:!bg-purple-500/30 data-[state=checked]:!bg-purple-500/30"
+                    >
+                      {goal}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-row justify-between gap-2 mt-6 sm:mt-8">
+              <button 
+                onClick={() => randomize(minutesOptions, locationOptions, goalOptions, isRandomizing, setIsRandomizing, setMinutes, setLocation, setGoal, setSelectedTask)}
+                disabled={isRandomizing}
+                className="bg-foreground/20 text-foreground px-6 py-3 rounded-none font-medium hover:bg-foreground/30 transition-colors disabled:opacity-50 w-12 flex items-center justify-center"
+              >
+                ↻
+              </button>
+              <button 
+                onClick={(e) => handleFindTask(e, tasks, minutes, location, goal, selectedTask, isTaskCycling, setIsTaskCycling, setSelectedTask)}
+                className="bg-foreground text-background px-6 py-3 rounded-none font-medium hover:bg-foreground/90 transition-colors flex-1"
+              >
+                Give me a task →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
