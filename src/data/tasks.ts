@@ -24,7 +24,7 @@ export const tasks: Task[] = [
     goals: ["learn"]
   },
   {
-    description: "Write down 3 must-do for tomorrow, and 1 thing you're looking forward to",
+    description: "Write down 3 must-do tasks for tomorrow, and 1 thing you're looking forward to",
     durations: [5],
     locations: ["work", "school"],
     goals: ["focus", "learn"]
@@ -35,19 +35,13 @@ export const tasks: Task[] = [
     locations: ["home", "work", "school", "the gym"],
     goals: ["focus", "learn"]
   },
-  {
-    description: "Clean up 3 items from your workspace",
-    durations: [5, 10, 15],
-    locations: ["home", "work"],
-    goals: ["relax", "focus"]
-  },
 
   // 10-minute tasks
   {
-    description: "Grab a snack you've never tried before from the nearest supermarket",
-    durations: [10, 15],
-    locations: ["work", "school", "the gym"],
-    goals: ["energize", "focus"]
+    description: "Learn 5 words in a new language and use them in a sentence",
+    durations: [5, 10],
+    locations: ["home", "school", "work"],
+    goals: ["learn", "focus"]
   },
   {
     description: "Brew yourself a cup of coffee",
@@ -57,6 +51,18 @@ export const tasks: Task[] = [
   },
 
   // 15-minute tasks
+  {
+    description: "Grab a snack you've never tried before from the nearest supermarket",
+    durations: [10, 15],
+    locations: ["work", "school", "the gym"],
+    goals: ["energize", "focus"]
+  },
+  {
+    description: "Clean up 3 items from your workspace",
+    durations: [5, 10, 15],
+    locations: ["home", "work"],
+    goals: ["relax", "focus"]
+  },
   {
     description: "Complete a Wim Hof breathing session",
     durations: [10, 15],
@@ -68,6 +74,12 @@ export const tasks: Task[] = [
     durations: [15],
     locations: ["the gym", "home"],
     goals: ["energize"]
+  },
+  {
+    description: "Sit by a window or balcony and observe your surroundings",
+    durations: [10, 15],
+    locations: ["home", "school", "work"],
+    goals: ["relax"]
   },
 
   // 30-minute tasks
@@ -82,6 +94,18 @@ export const tasks: Task[] = [
     durations: [30],
     locations: ["the gym"],
     goals: ["focus", "energize"]
+  },
+  {
+    description: "Go for a quick walk without your phone and observe your surroundings",
+    durations: [10, 15, 30],
+    locations: ["home"],
+    goals: ["energize", "relax"]
+  },
+  {
+    description: "Draw what you had for breakfast in your notes app",
+    durations: [10, 15, 30],
+    locations: ["home"],
+    goals: ["learn", "relax"]
   },
   {
     description: "Cook a meal you haven't made before",

@@ -3,7 +3,10 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { Task, tasks, Duration, Location, Goal } from "@/data/tasks";
-import { getRandomOption, findAnotherTask, handleFindTask, randomize } from "@/lib/task-functions";
+import { dailyChallenges, getDailyChallengeIndex } from "@/data/dailies";
+import { getRandomOption, findAnotherTask, handleFindTask, randomize, diceSymbols } from "@/lib/task-functions";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   const minutesOptions: Duration[] = [5, 10, 15, 30];
@@ -17,9 +20,15 @@ export default function Home() {
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskCycling, setIsTaskCycling] = useState(false);
+  const [diceSymbol, setDiceSymbol] = useState(getRandomOption(diceSymbols));
+  const [dailyChallenge, setDailyChallenge] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
+    // Get today's challenge
+    const today = new Date();
+    const index = getDailyChallengeIndex(today, dailyChallenges.length);
+    setDailyChallenge(dailyChallenges[index]);
   }, []);
 
   if (!isMounted) {
@@ -28,28 +37,32 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col relative">
+      <div className="flex flex-col items-center justify-center fixed top-4 left-0 right-0 mx-auto px-4 sm:px-2 text-center text-muted-foreground">
+        <div className="text-foreground">Today&apos;s Challenge</div>
+        <div>{dailyChallenge}</div>
+      </div>
       <div className="flex-1 flex items-center justify-center px-4 sm:px-2">
         {selectedTask ? (
           <div className="w-full max-w-[480px] min-h-[480px] justify-center flex flex-col">
             <div className="space-y-6 sm:space-y-8">
-
-              <button 
-                onClick={() => setSelectedTask(null)} 
-                className="text-sm bg-muted-foreground/20 text-foreground px-4 py-2 rounded-none hover:bg-foreground/30 transition-colors"
+              <Button 
+                variant="secondary" 
+                className="text-foreground text-sm rounded-none"
+                onClick={() => setSelectedTask(null)}
               >
                 ← Try again
-              </button>
+              </Button>
 
-              <p className="text-2xl sm:text-4xl min-h-[200px] flex items-center justify-center">{selectedTask.description}</p>
+              <p className="text-2xl sm:text-4xl min-h-[160px] flex items-center justify-center">{selectedTask.description}</p>
 
-              <button 
+              <Button 
+                className="w-full !py-6 text-md rounded-none"
+                size="lg"
                 onClick={(e) => findAnotherTask(e, tasks, minutes, location, goal, selectedTask, isTaskCycling, setIsTaskCycling, setSelectedTask)}
                 disabled={isTaskCycling}
-                className="bg-foreground w-full text-background px-6 py-3 rounded-none font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
               >
                 Give me another task ↻
-              </button>
-
+              </Button>
             </div>
           </div>
         ) : (
@@ -116,23 +129,34 @@ export default function Home() {
             </div>
             
             <div className="flex flex-row justify-between gap-2 mt-6 sm:mt-8">
-              <button 
-                onClick={() => randomize(minutesOptions, locationOptions, goalOptions, isRandomizing, setIsRandomizing, setMinutes, setLocation, setGoal, setSelectedTask)}
+
+              <Button 
+                size="icon"
+                variant="secondary"
+                className="p-6 text-3xl sm:text-2xl rounded-none"
                 disabled={isRandomizing}
-                className="bg-foreground/20 text-foreground px-6 py-3 rounded-none font-medium hover:bg-foreground/30 transition-colors disabled:opacity-50 w-12 flex items-center justify-center"
+                onClick={() => randomize(minutesOptions, locationOptions, goalOptions, isRandomizing, setIsRandomizing, setMinutes, setLocation, setGoal, setSelectedTask, setDiceSymbol)}
               >
-                ↻
-              </button>
-              <button 
+                {diceSymbol}
+              </Button>
+
+              <Button 
+                variant="default"
+                size="lg"
                 onClick={(e) => handleFindTask(e, tasks, minutes, location, goal, selectedTask, isTaskCycling, setIsTaskCycling, setSelectedTask)}
-                className="bg-foreground text-background px-6 py-3 rounded-none font-medium hover:bg-foreground/90 transition-colors flex-1"
+                className="flex-1 !p-6 text-md rounded-none"
               >
                 Give me a task →
-              </button>
+              </Button>
+
             </div>
           </div>
         )}
       </div>
+      <footer className="flex flex-col items-center fixed bottom-0 left-0 right-0 py-4 text-center text-xs text-muted-foreground">
+        <div>Want to see something added? <Link href="https://linkedin.com/in/tamerable" className="text-foreground hover:underline">Text me!</Link></div>
+        <div>I Have 30 Minutes | Built with ⚡️ by <Link href="https://tamerable.com" className="text-foreground hover:underline">Tamer</Link></div>
+      </footer>
     </div>
   );
 }

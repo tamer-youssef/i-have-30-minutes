@@ -1,5 +1,7 @@
 import { Task, Duration, Location, Goal } from "@/data/tasks";
 
+export const diceSymbols = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
 export const getRandomOption = <T>(options: T[]): T => {
   return options[Math.floor(Math.random() * options.length)];
 };
@@ -13,7 +15,8 @@ export const randomize = async (
   setMinutes: (value: string) => void,
   setLocation: (value: Location) => void,
   setGoal: (value: Goal) => void,
-  setSelectedTask: (task: Task | null) => void
+  setSelectedTask: (task: Task | null) => void,
+  setDiceSymbol?: (symbol: string) => void
 ) => {
   if (isRandomizing) return;
   setIsRandomizing(true);
@@ -24,6 +27,9 @@ export const randomize = async (
     setMinutes(getRandomOption(minutesOptions).toString());
     setLocation(getRandomOption(locationOptions));
     setGoal(getRandomOption(goalOptions));
+    if (setDiceSymbol) {
+      setDiceSymbol(getRandomOption(diceSymbols));
+    }
   }
   
   setIsRandomizing(false);
